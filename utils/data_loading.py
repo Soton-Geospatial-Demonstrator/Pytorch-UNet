@@ -10,7 +10,14 @@ from torch.utils.data import Dataset
 
 
 class BasicDataset(Dataset):
-    def __init__(self, images_dir: str, masks_dir: str, scale: float = 1.0, mask_suffix: str = ''):
+    def __init__(
+        self,
+        images_dir: str,
+        masks_dir: str,
+        scale: float = 1.0,
+        mask_suffix: str = '',
+        use_n: int = 0,
+    ):
         self.images_dir = Path(images_dir)
         self.masks_dir = Path(masks_dir)
         assert 0 < scale <= 1, 'Scale must be between 0 and 1'
@@ -20,6 +27,16 @@ class BasicDataset(Dataset):
         self.ids = [splitext(file)[0] for file in listdir(images_dir) if not file.startswith('.')]
         if not self.ids:
             raise RuntimeError(f'No input file found in {images_dir}, make sure you put your images there')
+        if not use_n == 0:
+            assert use_n > 21, f"use_n must be >= 20 (has been set to {use_n})"
+            if use_n > len(self.ids):
+                logging.info(f"use_n = {use_n} > num_imgs = {len(self.ids)}")
+            else:
+                self.ids = np.random.choice(
+                    self.ids,
+                    size=use_n,
+                    replace=False,
+                )
         logging.info(f'Creating dataset with {len(self.ids)} examples')
 
     def __len__(self):
@@ -76,5 +93,11 @@ class BasicDataset(Dataset):
 
 
 class CarvanaDataset(BasicDataset):
-    def __init__(self, images_dir, masks_dir, scale=1):
-        super().__init__(images_dir, masks_dir, scale, mask_suffix='_mask')
+    def __init__(self, images_dir, masks_dir, scale=1, use_n=0):
+        super().__init__(
+            images_dir,
+            masks_dir,
+            scale,
+            mask_suffix='_mask',
+            use_n=use_n,
+        )

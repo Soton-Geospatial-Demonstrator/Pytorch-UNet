@@ -29,12 +29,16 @@ def train_net(net,
               val_percent: float = 0.1,
               save_checkpoint: bool = True,
               img_scale: float = 0.5,
-              amp: bool = False):
+              amp: bool = False,
+              use_n: int = 0,
+):
     # 1. Create dataset
     try:
-        dataset = CarvanaDataset(dir_img, dir_mask, img_scale)
+        dataset = CarvanaDataset(dir_img, dir_mask, img_scale, use_n=use_n)
+        print("Carvana dataset")
     except (AssertionError, RuntimeError):
-        dataset = BasicDataset(dir_img, dir_mask, img_scale)
+        dataset = BasicDataset(dir_img, dir_mask, img_scale, use_n=use_n)
+        print("Basic dataset")
 
     # 2. Split into train / validation partitions
     n_val = int(len(dataset) * val_percent)
@@ -156,6 +160,7 @@ def get_args():
     parser.add_argument('--amp', action='store_true', default=False, help='Use mixed precision')
     parser.add_argument('--bilinear', action='store_true', default=False, help='Use bilinear upsampling')
     parser.add_argument('--classes', '-c', type=int, default=2, help='Number of classes')
+    parser.add_argument('--use_n', '-u', type=int, default=0, help='Number of imgs to use')
 
     return parser.parse_args()
 
@@ -190,7 +195,9 @@ if __name__ == '__main__':
                   device=device,
                   img_scale=args.scale,
                   val_percent=args.val / 100,
-                  amp=args.amp)
+                  amp=args.amp,
+                  use_n=args.use_n,
+        )
     except KeyboardInterrupt:
         torch.save(net.state_dict(), 'INTERRUPTED.pth')
         logging.info('Saved interrupt')
