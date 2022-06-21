@@ -61,6 +61,10 @@ class BasicDataset(Dataset):
                 img_ndarray = img_ndarray.transpose((2, 0, 1))
 
             img_ndarray = img_ndarray / 255
+        elif not np.isclose(img_ndarray.max(), 0):
+            img_ndarray = (~ np.isclose(img_ndarray, 0.0)).astype(int)
+            # If mask is not 100% black:
+            #   Make sure mask is black-white 1-bit pixel values
 
         return img_ndarray
 
