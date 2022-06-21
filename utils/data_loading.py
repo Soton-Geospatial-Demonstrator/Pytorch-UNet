@@ -24,7 +24,11 @@ class BasicDataset(Dataset):
         self.scale = scale
         self.mask_suffix = mask_suffix
 
-        self.ids = [splitext(file)[0] for file in listdir(images_dir) if not file.startswith('.')]
+        self.ids = [
+            splitext(filepath)[0]
+            for filepath in images_dir.rglob("[!.]*")
+            if filepath.is_file()
+        ]
         if not self.ids:
             raise RuntimeError(f'No input file found in {images_dir}, make sure you put your images there')
         if not use_n == 0:
@@ -71,10 +75,10 @@ class BasicDataset(Dataset):
             return Image.open(filename)
 
     def __getitem__(self, idx):
-        name = self.ids[idx]
-        mask_file = list(self.masks_dir.glob(name + self.mask_suffix + '.*'))
-        img_file = list(self.images_dir.glob(name + '.*'))
-
+        name = Path(self.ids[idx]).name
+        # Check no duplicate files with different file types present
+        mask_file = list(self.masks_dir.rglob(name + self.mask_suffix + '.*'))
+        img_file = list(self.images_dir.rglob(name + '.*'))
         assert len(img_file) == 1, f'Either no image or multiple images found for the ID {name}: {img_file}'
         assert len(mask_file) == 1, f'Either no mask or multiple masks found for the ID {name}: {mask_file}'
         mask = self.load(mask_file[0])
