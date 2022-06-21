@@ -15,6 +15,7 @@ class BasicDataset(Dataset):
         images_dir: str,
         masks_dir: str,
         scale: float = 1.0,
+        mask_prefix: str = '',
         mask_suffix: str = '',
         use_n: int = 0,
     ):
@@ -22,6 +23,7 @@ class BasicDataset(Dataset):
         self.masks_dir = Path(masks_dir)
         assert 0 < scale <= 1, 'Scale must be between 0 and 1'
         self.scale = scale
+        self.mask_prefix = mask_prefix
         self.mask_suffix = mask_suffix
 
         self.ids = [
@@ -80,11 +82,12 @@ class BasicDataset(Dataset):
 
     def __getitem__(self, idx):
         name = Path(self.ids[idx]).name
+        mask_name = self.mask_prefix + name + self.mask_suffix
         # Check no duplicate files with different file types present
-        mask_file = list(self.masks_dir.rglob(name + self.mask_suffix + '.*'))
+        mask_file = list(self.masks_dir.rglob(mask_name + '.*'))
         img_file = list(self.images_dir.rglob(name + '.*'))
         assert len(img_file) == 1, f'Either no image or multiple images found for the ID {name}: {img_file}'
-        assert len(mask_file) == 1, f'Either no mask or multiple masks found for the ID {name}: {mask_file}'
+        assert len(mask_file) == 1, f'Either no mask or multiple masks found for the ID {mask_name}: {mask_file}'
         mask = self.load(mask_file[0])
         img = self.load(img_file[0])
 

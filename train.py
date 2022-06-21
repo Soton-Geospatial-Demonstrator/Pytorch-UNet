@@ -30,14 +30,25 @@ def train_net(net,
               save_checkpoint: bool = True,
               img_scale: float = 0.5,
               amp: bool = False,
+              mask_prefix = '',
+              mask_suffix = '',
               use_n: int = 0,
 ):
     # 1. Create dataset
     try:
+        assert mask_prefix == ''
+        assert mask_suffix == ''
         dataset = CarvanaDataset(dir_img, dir_mask, img_scale, use_n=use_n)
         print("Carvana dataset")
     except (AssertionError, RuntimeError):
-        dataset = BasicDataset(dir_img, dir_mask, img_scale, use_n=use_n)
+        dataset = BasicDataset(
+            dir_img,
+            dir_mask,
+            img_scale,
+            mask_prefix=mask_prefix,
+            mask_suffix=mask_suffix,
+            use_n=use_n,
+        )
         print("Basic dataset")
 
     # 2. Split into train / validation partitions
@@ -160,6 +171,8 @@ def get_args():
     parser.add_argument('--amp', action='store_true', default=False, help='Use mixed precision')
     parser.add_argument('--bilinear', action='store_true', default=False, help='Use bilinear upsampling')
     parser.add_argument('--classes', '-c', type=int, default=2, help='Number of classes')
+    parser.add_argument('--mask_prefix', type=str, default='', help='Prefix for mask file names')
+    parser.add_argument('--mask_suffix', type=str, default='', help='Suffix for mask file names')
     parser.add_argument('--use_n', '-u', type=int, default=0, help='Number of imgs to use')
 
     return parser.parse_args()
@@ -196,6 +209,8 @@ if __name__ == '__main__':
                   img_scale=args.scale,
                   val_percent=args.val / 100,
                   amp=args.amp,
+                  mask_prefix=args.mask_prefix,
+                  mask_suffix=args.mask_suffix,
                   use_n=args.use_n,
         )
     except KeyboardInterrupt:
