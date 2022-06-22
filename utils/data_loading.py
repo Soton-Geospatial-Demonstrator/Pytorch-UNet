@@ -28,7 +28,9 @@ class BasicDataset(Dataset):
 
         self.ids = [
             splitext(filepath)[0]
-            for filepath in images_dir.rglob("[!.]*")
+            for filepath in images_dir.rglob(
+                "[!.]*[!ini]"
+            )
             if filepath.is_file()
         ]
         if not self.ids:
