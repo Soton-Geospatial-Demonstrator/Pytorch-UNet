@@ -33,6 +33,7 @@ def train_net(net,
               mask_suffix = '',
               use_n: int = 0,
               dir_imgs: str = './data/imgs',
+              dir_mask: str = './data/mask',
               file_img_ids: str = '',
 ):
     # 1. Create dataset
@@ -183,6 +184,7 @@ def get_args():
     parser.add_argument('--mask_suffix', type=str, default='', help='Suffix for mask file names')
     parser.add_argument('--use_n', '-u', type=int, default=0, help='Number of imgs to use')
     parser.add_argument('--dir_imgs', type=str, default='./data/imgs/', help='Path to directory of imgs to use')
+    parser.add_argument('--dir_mask', type=str, default='./data/masks/', help='Path to directory of masks to use')
     parser.add_argument('--file_img_ids', type=str, default='', help='Path to list of img filepaths to use')
 
     return parser.parse_args()
@@ -223,6 +225,7 @@ if __name__ == '__main__':
                   mask_suffix=args.mask_suffix,
                   use_n=args.use_n,
                   dir_imgs=args.dir_imgs,
+                  dir_mask=args.dir_mask,
                   file_img_ids=args.file_img_ids,
         )
     except KeyboardInterrupt:
