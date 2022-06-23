@@ -3,6 +3,7 @@ from os import listdir
 from os.path import splitext
 from pathlib import Path
 
+import csv
 import numpy as np
 import torch
 from PIL import Image
@@ -18,6 +19,7 @@ class BasicDataset(Dataset):
         mask_prefix: str = '',
         mask_suffix: str = '',
         use_n: int = 0,
+        file_img_ids: str = '',
     ):
         self.images_dir = Path(images_dir)
         self.masks_dir = Path(masks_dir)
@@ -26,15 +28,36 @@ class BasicDataset(Dataset):
         self.mask_prefix = mask_prefix
         self.mask_suffix = mask_suffix
 
-        self.ids = [
-            splitext(filepath)[0]
-            for filepath in images_dir.rglob(
-                "[!.]*[!ini]"
-            )
-            if filepath.is_file()
-        ]
-        if not self.ids:
-            raise RuntimeError(f'No input file found in {images_dir}, make sure you put your images there')
+        file_img_ids = Path(file_img_ids).resolve()
+        if file_img_ids == '':
+            self.ids = [
+                splitext(filepath)[0]
+                for filepath in images_dir.rglob(
+                    "[!.]*[!ini]"
+                )
+                if filepath.is_file()
+            ]
+            if not self.ids:
+                raise RuntimeError(
+                    f'No input file found in {images_dir}, make sure'
+                    f' you put your images there'
+                )
+        else:  # Use image ids indicated in file
+            logging.info(f'Reading img IDs from {file_img_ids}')
+            self.ids = []
+            with open(file_img_ids) as csvfile:
+                for row in csv.reader(csvfile):
+                    try:
+                        self.ids.append(splitext(row[0])[0])
+                    except:
+                        pass
+            if not self.ids:
+                raise RuntimeError(
+                    f'No filepaths found in {file_img_ids}, make sure'
+                    f' you put your filepaths there'
+                )
+            
+        
         if not use_n == 0:
             assert use_n > 21, f"use_n must be >= 20 (has been set to {use_n})"
             if use_n > len(self.ids):
@@ -106,11 +129,19 @@ class BasicDataset(Dataset):
 
 
 class CarvanaDataset(BasicDataset):
-    def __init__(self, images_dir, masks_dir, scale=1, use_n=0):
+    def __init__(
+        self,
+        images_dir,
+        masks_dir,
+        scale=1,
+        use_n=0,
+        file_img_ids='',
+    ):
         super().__init__(
             images_dir,
             masks_dir,
             scale,
             mask_suffix='_mask',
             use_n=use_n,
+            file_img_ids=file_img_ids,
         )

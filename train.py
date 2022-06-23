@@ -16,7 +16,6 @@ from utils.dice_score import dice_loss
 from evaluate import evaluate
 from unet import UNet
 
-dir_img = Path('./data/imgs/')
 dir_mask = Path('./data/masks/')
 dir_checkpoint = Path('./checkpoints/')
 
@@ -33,21 +32,30 @@ def train_net(net,
               mask_prefix = '',
               mask_suffix = '',
               use_n: int = 0,
+              dir_imgs: str = './data/imgs',
+              file_img_ids: str = '',
 ):
     # 1. Create dataset
     try:
         assert mask_prefix == ''
         assert mask_suffix == ''
-        dataset = CarvanaDataset(dir_img, dir_mask, img_scale, use_n=use_n)
+        dataset = CarvanaDataset(
+            dir_imgs,
+            dir_mask,
+            img_scale,
+            use_n=use_n,
+            file_img_ids=file_img_ids,
+        )
         print("Carvana dataset")
     except (AssertionError, RuntimeError):
         dataset = BasicDataset(
-            dir_img,
+            dir_imgs,
             dir_mask,
             img_scale,
             mask_prefix=mask_prefix,
             mask_suffix=mask_suffix,
             use_n=use_n,
+            file_img_ids=file_img_ids,
         )
         print("Basic dataset")
 
@@ -174,6 +182,8 @@ def get_args():
     parser.add_argument('--mask_prefix', type=str, default='', help='Prefix for mask file names')
     parser.add_argument('--mask_suffix', type=str, default='', help='Suffix for mask file names')
     parser.add_argument('--use_n', '-u', type=int, default=0, help='Number of imgs to use')
+    parser.add_argument('--dir_imgs', type=str, default='./data/imgs/', help='Path to directory of imgs to use')
+    parser.add_argument('--file_img_ids', type=str, default='', help='Path to list of img filepaths to use')
 
     return parser.parse_args()
 
@@ -212,6 +222,8 @@ if __name__ == '__main__':
                   mask_prefix=args.mask_prefix,
                   mask_suffix=args.mask_suffix,
                   use_n=args.use_n,
+                  dir_imgs=args.dir_imgs,
+                  file_img_ids=args.file_img_ids,
         )
     except KeyboardInterrupt:
         torch.save(net.state_dict(), 'INTERRUPTED.pth')
