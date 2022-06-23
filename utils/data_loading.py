@@ -28,7 +28,6 @@ class BasicDataset(Dataset):
         self.mask_prefix = mask_prefix
         self.mask_suffix = mask_suffix
 
-        file_img_ids = Path(file_img_ids).resolve()
         if file_img_ids == '':
             self.ids = [
                 splitext(filepath)[0]
@@ -43,6 +42,7 @@ class BasicDataset(Dataset):
                     f' you put your images there'
                 )
         else:  # Use image ids indicated in file
+            file_img_ids = Path(file_img_ids).resolve()
             logging.info(f'Reading img IDs from {file_img_ids}')
             self.ids = []
             with open(file_img_ids) as csvfile:
