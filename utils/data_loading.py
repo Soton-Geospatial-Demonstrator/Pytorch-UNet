@@ -31,14 +31,14 @@ class BasicDataset(Dataset):
         if file_img_ids == '':
             self.ids = [
                 splitext(filepath)[0]
-                for filepath in images_dir.rglob(
+                for filepath in self.images_dir.rglob(
                     "[!.]*[!ini]"
                 )
                 if filepath.is_file()
             ]
             if not self.ids:
                 raise RuntimeError(
-                    f'No input file found in {images_dir}, make sure'
+                    f'No input file found in {self.images_dir}, make sure'
                     f' you put your images there'
                 )
         else:  # Use image ids indicated in file
