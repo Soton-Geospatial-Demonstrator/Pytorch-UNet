@@ -32,7 +32,7 @@ class BasicDataset(Dataset):
             self.ids = [
                 splitext(filepath)[0]
                 for filepath in self.images_dir.rglob(
-                    "[!.]*[!ini]"
+                    "[!.]*[!ini, !xml]"
                 )
                 if filepath.is_file()
             ]
